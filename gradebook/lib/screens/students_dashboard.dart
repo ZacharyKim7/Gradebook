@@ -11,17 +11,33 @@ class StudentsDashboard extends StatefulWidget {
   State<StudentsDashboard> createState() => _StudentsDashboardState();
 }
 
-class _StudentsDashboardState extends State<StudentsDashboard> {
+class _StudentsDashboardState extends State<StudentsDashboard>
+    with SingleTickerProviderStateMixin {
   final StudentService _studentService = StudentService();
   List<Homeroom> _homerooms = [];
   bool _isLoading = true;
   String? _error;
   bool _sortAscending = true;
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
     _loadHomerooms();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadHomerooms() async {
@@ -171,11 +187,16 @@ class _StudentsDashboardState extends State<StudentsDashboard> {
                         },
                         trailing: MouseRegion(
                           cursor: SystemMouseCursors.click,
-                          child: IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () => _deleteStudent(student),
-                            tooltip: 'Delete student',
-                            iconSize: 24,
+                          onEnter: (_) => _animationController.forward(),
+                          onExit: (_) => _animationController.reverse(),
+                          child: ScaleTransition(
+                            scale: _scaleAnimation,
+                            child: IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () => _deleteStudent(student),
+                              tooltip: 'Delete student',
+                              iconSize: 24,
+                            ),
                           ),
                         ),
                       ),

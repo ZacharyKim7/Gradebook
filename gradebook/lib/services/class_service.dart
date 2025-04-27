@@ -51,15 +51,16 @@ class ClassService {
   Future<void> enrollStudent(String classId, String studentId) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/classes/$classId/enroll'),
+        Uri.parse('$baseUrl/classes/$classId/students'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'studentId': studentId}),
       );
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to enroll student');
+        throw Exception('Failed to enroll student: ${response.body}');
       }
     } catch (e) {
+      print('Error in enrollStudent: $e');
       throw Exception('Error enrolling student: $e');
     }
   }
